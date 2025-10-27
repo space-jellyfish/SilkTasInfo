@@ -1,0 +1,125 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net472</TargetFramework>
+        <LangVersion>9</LangVersion>
+        <Configurations>v28324</Configurations>
+        <Platforms>AnyCPU</Platforms>
+        <AssemblyVersion>0.1</AssemblyVersion>
+        <FileVersion>0.1</FileVersion>
+        <AssemblyName>Assembly-CSharp.TasInfo.mm</AssemblyName>
+        <RootNamespace>Assembly_CSharp.TasInfo.mm</RootNamespace>
+        <Company>Assembly-CSharp.TasInfo.mm</Company>
+        <Product>Assembly-CSharp.TasInfo.mm</Product>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <Optimize>true</Optimize>
+        <DebugType>none</DebugType>
+        <OutputPath>bin\$(Configuration)\</OutputPath>
+        <Mono Condition="$(OS) == WINDOWS_NT" />
+        <Mono Condition="$(OS) != WINDOWS_NT">mono</Mono>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <Compile Remove="lib\**" />
+        <Compile Remove="bin\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <EmbeddedResource Remove="lib\**" />
+        <EmbeddedResource Remove="bin\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Remove="lib\**" />
+        <None Remove="bin\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>lib\$(Configuration)\Assembly-CSharp.dll</HintPath>
+        </Reference>
+        <Reference Include="PlayMaker, Version=1.6.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>lib\$(Configuration)\PlayMaker.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>lib\$(Configuration)\UnityEngine.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>lib\$(Configuration)\UnityEngine.CoreModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>lib\$(Configuration)\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.Physics2DModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>lib\$(Configuration)\UnityEngine.Physics2DModule.dll</HintPath>
+        </Reference>
+        <Reference Include="UnityEngine.InputLegacyModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+            <HintPath>lib\$(Configuration)\UnityEngine.InputLegacyModule.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="MonoMod" Version="21.4.29.1">
+            <IncludeAssets>all</IncludeAssets>
+        </PackageReference>
+
+        <PackageReference Include="MonoMod.RuntimeDetour" Version="21.4.29.1">
+            <IncludeAssets>all</IncludeAssets>
+        </PackageReference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Files Include="$(ProjectDir)lib\$(Configuration)\*" />
+        <BuildDir Include="$(TargetDir)" />
+    </ItemGroup>
+
+    <PropertyGroup>
+        <AllOutputDir>$(ProjectDir)bin\Silksong TAS Info Tool\</AllOutputDir>
+        <TempOutputDir>$(ProjectDir)bin\temp\$(Configuration)</TempOutputDir>
+        <OutputDir>$(AllOutputDir)\$(Configuration)</OutputDir>
+        <ZipFile>$(ProjectDir)bin\SilkTAS_Info_Tool_v$(AssemblyVersion).zip</ZipFile>
+    </PropertyGroup>
+
+    <PropertyGroup>
+      <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    </PropertyGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Delete Condition="Exists('$(OutputDir)')" Files="$(OutputDir)" />
+        <Delete Condition="Exists('$(ZipFile)')" Files="$(ZipFile)" />
+
+        <Copy SkipUnchangedFiles="true" SourceFiles="@(Files)" DestinationFolder="@(BuildDir)" />
+
+        <Delete Condition="Exists('MONOMODDED_Assembly-CSharp.dll')" Files="MONOMODDED_Assembly-CSharp.dll" />
+        <Exec WorkingDirectory="@(BuildDir)" Command="$(Mono) MonoMod.exe Assembly-CSharp.dll" />
+
+        <MakeDir Directories="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/original" />
+        <Copy SourceFiles="$(ProjectDir)/README.md" DestinationFiles="$(OutputDir)/README.md" />
+        <Copy SourceFiles="$(ProjectDir)/SilkTasInfo.config" DestinationFiles="$(OutputDir)/SilkTasInfo.config" />
+        <Copy SourceFiles="$(ProjectDir)/SilkTasInfo.lua" DestinationFiles="$(OutputDir)/SilkTasInfo.lua" />
+        <Copy SourceFiles="$(TargetDir)MONOMODDED_Assembly-CSharp.dll" DestinationFiles="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/Assembly-CSharp.dll" />
+        <Copy SourceFiles="$(TargetDir)Assembly-CSharp.dll" DestinationFiles="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/original/Assembly-CSharp.dll" />
+        <Copy SourceFiles="$(TargetDir)MonoMod.RuntimeDetour.dll" DestinationFiles="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/MonoMod.RuntimeDetour.dll" />
+        <Copy SourceFiles="$(TargetDir)MonoMod.Utils.dll" DestinationFiles="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/MonoMod.Utils.dll" />
+        <Copy SourceFiles="$(TargetDir)Mono.Cecil.dll" DestinationFiles="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/Mono.Cecil.dll" />
+        <Copy SourceFiles="$(TargetDir)Mono.Cecil.Mdb.dll" DestinationFiles="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/Mono.Cecil.Mdb.dll" />
+        <Copy SourceFiles="$(TargetDir)Mono.Cecil.Pdb.dll" DestinationFiles="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/Mono.Cecil.Pdb.dll" />
+        <Copy SourceFiles="$(TargetDir)Mono.Cecil.Rocks.dll" DestinationFiles="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/Mono.Cecil.Rocks.dll" />
+        <Copy SourceFiles="$(TargetDir)Mono.Security.dll" DestinationFiles="$(OutputDir)/Hollow_Knight_Silksong_Data/Managed/Mono.Security.dll" />
+
+        <ZipDirectory SourceDirectory="$(AllOutputDir)" DestinationFile="$(ZipFile)" />
+
+        <MakeDir Directories="$(TempOutputDir)/Hollow_Knight_Silksong_Data/Managed/original" />
+        <Copy SourceFiles="$(ProjectDir)/README.md" DestinationFiles="$(TempOutputDir)/README.md" />
+        <Copy SourceFiles="$(ProjectDir)/SilkTasInfo.config" DestinationFiles="$(TempOutputDir)/SilkTasInfo.config" />
+        <Copy SourceFiles="$(ProjectDir)/SilkTasInfo.lua" DestinationFiles="$(TempOutputDir)/SilkTasInfo.lua" />
+        <Copy SourceFiles="$(TargetDir)MONOMODDED_Assembly-CSharp.dll" DestinationFiles="$(TempOutputDir)/Hollow_Knight_Silksong_Data/Managed/Assembly-CSharp.dll" />
+        <Copy SourceFiles="$(TargetDir)Assembly-CSharp.dll" DestinationFiles="$(TempOutputDir)/Hollow_Knight_Silksong_Data/Managed/original/Assembly-CSharp.dll" />
+    </Target>
+</Project>
