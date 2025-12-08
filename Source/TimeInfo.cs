@@ -58,17 +58,11 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             var sceneLoadField = typeof(GameManager).GetField("sceneLoad", BindingFlags.Instance | BindingFlags.NonPublic);
             object sceneLoadObj = sceneLoadField?.GetValue(gameManager);
             bool sceneLoadActivationAllowed = false;
-            var type = sceneLoadObj.GetType();
-            var prop = type.GetProperty("IsActivationAllowed", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-            if (prop != null) {
-                sceneLoadActivationAllowed = (bool)prop.GetValue(sceneLoadObj);
-            }
-            else {
-                var field = type.GetField("<IsActivationAllowed>k__BackingField",
-                    BindingFlags.Instance | BindingFlags.NonPublic);
+            if (sceneLoadObj != null) {
+                var allowedField = sceneLoadObj.GetType().GetField("<IsActivationAllowed>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
 
-                if (field != null)
-                    sceneLoadActivationAllowed = (bool)field.GetValue(sceneLoadObj);
+                if (allowedField != null)
+                    sceneLoadActivationAllowed = (bool)allowedField.GetValue(sceneLoadObj);
             }
             
             if (!timeStart && nextScene == "Tut_01" && sceneLoadActivationAllowed) {
