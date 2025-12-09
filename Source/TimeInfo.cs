@@ -64,8 +64,9 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 if (allowedField != null)
                     sceneLoadActivationAllowed = (bool)allowedField.GetValue(sceneLoadObj);
             }
+            infoBuilder.AppendLine($"sceneLoadActivationAllowed = {sceneLoadActivationAllowed}");
             
-            if (!timeStart && nextScene == "Tut_01" && sceneLoadActivationAllowed) {
+            if (!timeStart && nextScene == "Tut_01" /*&& sceneLoadActivationAllowed*/) {
                 // the StartNewGame trigger
                 timeStart = true;
                 inGameTime = ConfigManager.StartingGameTime;
