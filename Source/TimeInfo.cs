@@ -12,18 +12,12 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
         private const string QUIT_TO_MENU = "Quit_To_Menu";
         private const string MENU_TITLE = "Menu_Title";
         private const string OPENING_SEQUENCE = "Opening_Sequence";
-        private const int UI_STATE_CUTSCENE = 3;
-        private const int UI_STATE_PLAYING = 4;
-        private const int UI_STATE_PAUSED = 5;
-        private const int HERO_TRANSITION_STATE_WAITING_TO_ENTER_LEVEL = 2;
-
-        private static readonly FieldInfo TeleportingFieldInfo = typeof(CameraController).GetFieldInfo("teleporting");
-        private static readonly FieldInfo TilemapDirtyFieldInfo = typeof(GameManager).GetFieldInfo("tilemapDirty");
 
         public static bool timeStart = false;
         private static bool timeEnd = false;
         private static float inGameTime = 0f;
-        private static readonly int minorVersion = int.Parse(Constants.GAME_VERSION.Substring(2, 1));
+
+        private static FieldInfo sceneLoadFieldInfo = null;
 
         private static string FormattedTime {
             get {
@@ -55,18 +49,10 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             GameState gameState = gameManager.GameState;
 
             //TODO: Determine start/end logic based on autosplitter
-            var sceneLoadField = typeof(GameManager).GetField("sceneLoad", BindingFlags.Instance | BindingFlags.NonPublic);
-            object sceneLoadObj = sceneLoadField?.GetValue(gameManager);
-            bool sceneLoadActivationAllowed = false;
-            if (sceneLoadObj != null) {
-                var allowedField = sceneLoadObj.GetType().GetField("<IsActivationAllowed>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-
-                if (allowedField != null)
-                    sceneLoadActivationAllowed = (bool)allowedField.GetValue(sceneLoadObj);
-            }
+            bool sceneLoadActivationAllowed = gameManager.LastSceneLoad.IsActivationAllowed;
             infoBuilder.AppendLine($"sceneLoadActivationAllowed = {sceneLoadActivationAllowed}");
             
-            if (!timeStart && nextScene == "Tut_01" /*&& sceneLoadActivationAllowed*/) {
+            if (!timeStart && nextScene == "Tut_01" && sceneLoadActivationAllowed) {
                 // the StartNewGame trigger
                 timeStart = true;
                 inGameTime = ConfigManager.StartingGameTime;
@@ -78,49 +64,39 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
 
             //TODO: Load removal logic goes here, once it's defined
             // migrated from https://github.com/AlexKnauth/silksong-autosplit-wasm/blob/master/src/lib.rs
-            int uiState = 0;
-            var uiField = typeof(GameManager).GetField("<ui>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-            object uiObj = uiField?.GetValue(gameManager);
-            if (uiObj != null)
-            {
-                var uiStateField = uiObj.GetType().GetField("uiState", BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic);
-                if (uiStateField != null) uiState = (int)uiStateField.GetValue(uiObj);
-            }
+            bool timePaused = false;
 
-            bool loadingMenu = (currentScene == QUIT_TO_MENU) ||
-                (currentScene != MENU_TITLE && (string.IsNullOrEmpty(nextScene) || nextScene == MENU_TITLE));
-            if (gameState == GameState.PLAYING && lastGameState == GameState.MAIN_MENU) {
-                lookForTeleporting = true;
-            }
-            if (lookForTeleporting && (gameState != GameState.PLAYING && gameState != GameState.ENTERING_LEVEL)) {
-                lookForTeleporting = false;
-            }
-            if (gameState == GameState.LOADING && lastGameState == GameState.CUTSCENE && currentScene == OPENING_SEQUENCE) {
-                mmsRoomDupe = true;
-            }
-            else if (gameState == GameState.PLAYING) {
-                mmsRoomDupe = false;
-            }
-            
-            var inputHandlerField = typeof(GameManager).GetField("<inputHandler>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-            var inputHandler = inputHandlerField.GetValue(gameManager);
-            var acceptingInputField = inputHandler.GetType().GetField("acceptingInput", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-            bool acceptingInput = (bool)acceptingInputField.GetValue(inputHandler);
+            try {
+                bool loadingMenu = (currentScene == QUIT_TO_MENU)
+                    || (currentScene != MENU_TITLE && (string.IsNullOrEmpty(nextScene)
+                    || nextScene == MENU_TITLE));
+                if (gameState == GameState.PLAYING && lastGameState == GameState.MAIN_MENU) {
+                    lookForTeleporting = true;
+                }
+                if (lookForTeleporting && (gameState != GameState.PLAYING && gameState != GameState.ENTERING_LEVEL)) {
+                    lookForTeleporting = false;
+                }
+                if (gameState == GameState.LOADING && lastGameState == GameState.CUTSCENE && currentScene == OPENING_SEQUENCE) {
+                    mmsRoomDupe = true;
+                }
+                else if (gameState == GameState.PLAYING) {
+                    mmsRoomDupe = false;
+                }
+                bool acceptingInput = gameManager.inputHandler.acceptingInput;
+                HeroTransitionState heroTransitionState = gameManager.hero_ctrl?.transitionState ?? HeroTransitionState.WAITING_TO_TRANSITION;
+                UIState uiState = gameManager.ui.uiState;
 
-            var heroTransitionField = typeof(GameManager).GetField("<heroTransitionState>k__BackingField", BindingFlags.Instance | BindingFlags.NonPublic);
-            HeroTransitionState heroTransitionState = HeroTransitionState.WAITING_TO_TRANSITION;
-            if (heroTransitionField != null) {
-                heroTransitionState = (HeroTransitionState)heroTransitionField.GetValue(gameManager);
-            }
+                bool sceneLoadNull = gameManager.LastSceneLoad == null;
 
-            bool sceneLoadNull = sceneLoadObj == null;
-            
-            bool timePaused = (lookForTeleporting)
-                || ((gameState == GameState.PLAYING || gameState == GameState.ENTERING_LEVEL) && uiState != UI_STATE_PLAYING)
-                || (gameState != GameState.PLAYING && gameState != GameState.CUTSCENE && !acceptingInput && !mmsRoomDupe)
-                || ((gameState == GameState.EXITING_LEVEL && (sceneLoadNull || sceneLoadActivationAllowed) && !mmsRoomDupe) || gameState == GameState.LOADING)
-                || (heroTransitionState == HeroTransitionState.WAITING_TO_ENTER_LEVEL)
-                || (uiState != UI_STATE_PLAYING && (loadingMenu || (uiState != UI_STATE_PAUSED && uiState != UI_STATE_CUTSCENE && !string.IsNullOrEmpty(nextScene))) && nextScene != currentScene);
+                timePaused = (lookForTeleporting)
+                    || ((gameState == GameState.PLAYING || gameState == GameState.ENTERING_LEVEL) && uiState != UIState.PLAYING)
+                    || (gameState != GameState.PLAYING && gameState != GameState.CUTSCENE && !acceptingInput && !mmsRoomDupe)
+                    || ((gameState == GameState.EXITING_LEVEL && (sceneLoadNull || sceneLoadActivationAllowed) && !mmsRoomDupe) || gameState == GameState.LOADING)
+                    || (heroTransitionState == HeroTransitionState.WAITING_TO_ENTER_LEVEL)
+                    || (uiState != UIState.PLAYING && (loadingMenu || (uiState != UIState.PAUSED && uiState != UIState.CUTSCENE && !string.IsNullOrEmpty(nextScene))) && nextScene != currentScene);
+            } catch {
+                // ignore
+            }
 
             lastGameState = gameState;
 
