@@ -17,7 +17,7 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
         private static bool timeEnd = false;
         private static float inGameTime = 0f;
 
-        private static FieldInfo sceneLoadFieldInfo = null;
+        private static FieldInfo sceneLoadFieldInfo = typeof(GameManager).GetField("sceneLoad", BindingFlags.NonPublic | BindingFlags.Instance);
 
         private static string FormattedTime {
             get {
@@ -49,7 +49,18 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             GameState gameState = gameManager.GameState;
 
             //TODO: Determine start/end logic based on autosplitter
-            bool sceneLoadActivationAllowed = gameManager.LastSceneLoad.IsActivationAllowed;
+            bool sceneLoadActivationAllowed = false;
+            object sceneLoad = sceneLoadFieldInfo.GetValue(gameManager);
+            if (sceneLoad == null) {
+                sceneLoadActivationAllowed = true;
+            }
+            else {
+                PropertyInfo activationAllowedProp = sceneLoad.GetType().GetProperty("IsActivationAllowed");
+                
+                if (activationAllowedProp != null) {
+                    sceneLoadActivationAllowed = (bool)activationAllowedProp.GetValue(sceneLoad);
+                }
+            }
             infoBuilder.AppendLine($"sceneLoadActivationAllowed = {sceneLoadActivationAllowed}");
             
             if (!timeStart && nextScene == "Tut_01" && sceneLoadActivationAllowed) {
@@ -85,8 +96,8 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 bool acceptingInput = gameManager.inputHandler.acceptingInput;
                 HeroTransitionState heroTransitionState = gameManager.hero_ctrl?.transitionState ?? HeroTransitionState.WAITING_TO_TRANSITION;
                 UIState uiState = gameManager.ui.uiState;
-
-                bool sceneLoadNull = gameManager.LastSceneLoad == null;
+                
+                bool sceneLoadNull = (sceneLoadFieldInfo.GetValue(gameManager) == null);
 
                 timePaused = (lookForTeleporting)
                     || ((gameState == GameState.PLAYING || gameState == GameState.ENTERING_LEVEL) && uiState != UIState.PLAYING)
