@@ -9,15 +9,14 @@ using UnityEngine;
 
 namespace Assembly_CSharp.TasInfo.mm.Source {
     internal static class TimeInfo {
-        private const string QUIT_TO_MENU = "Quit_To_Menu";
-        private const string MENU_TITLE = "Menu_Title";
-        private const string OPENING_SEQUENCE = "Opening_Sequence";
+        private static readonly FieldInfo TeleportingFieldInfo = typeof(CameraController).GetFieldInfo("teleporting");
+        private static readonly FieldInfo TilemapDirtyFieldInfo = typeof(GameManager).GetFieldInfo("tilemapDirty");
+        private static readonly FieldInfo SceneLoadFieldInfo = typeof(GameManager).GetField("sceneLoad", BindingFlags.NonPublic | BindingFlags.Instance);
 
         public static bool timeStart = false;
         private static bool timeEnd = false;
         private static float inGameTime = 0f;
-
-        private static FieldInfo sceneLoadFieldInfo = typeof(GameManager).GetField("sceneLoad", BindingFlags.NonPublic | BindingFlags.Instance);
+        private static readonly int minorVersion = int.Parse(Constants.GAME_VERSION.Substring(2, 1));
 
         private static string FormattedTime {
             get {
@@ -48,9 +47,9 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             string nextScene = gameManager.nextSceneName;
             GameState gameState = gameManager.GameState;
 
-            //TODO: Determine start/end logic based on autosplitter
+            //TODO: Determine end logic based on autosplitter
             bool sceneLoadActivationAllowed = false;
-            object sceneLoad = sceneLoadFieldInfo.GetValue(gameManager);
+            object sceneLoad = SceneLoadFieldInfo.GetValue(gameManager);
             if (sceneLoad == null) {
                 sceneLoadActivationAllowed = true;
             }
@@ -61,10 +60,9 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                     sceneLoadActivationAllowed = (bool)activationAllowedProp.GetValue(sceneLoad);
                 }
             }
-            infoBuilder.AppendLine($"sceneLoadActivationAllowed = {sceneLoadActivationAllowed}");
             
             if (!timeStart && nextScene == "Tut_01" && sceneLoadActivationAllowed) {
-                // the StartNewGame trigger
+                // StartNewGame
                 timeStart = true;
                 inGameTime = ConfigManager.StartingGameTime;
             }
@@ -73,21 +71,20 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             //     timeEnd = true;
             // }
 
-            //TODO: Load removal logic goes here, once it's defined
-            // migrated from https://github.com/AlexKnauth/silksong-autosplit-wasm/blob/master/src/lib.rs
             bool timePaused = false;
-
+            
+            // migrated from https://github.com/AlexKnauth/silksong-autosplit-wasm/blob/master/src/lib.rs
             try {
-                bool loadingMenu = (currentScene == QUIT_TO_MENU)
-                    || (currentScene != MENU_TITLE && (string.IsNullOrEmpty(nextScene)
-                    || nextScene == MENU_TITLE));
+                bool loadingMenu = (currentScene == "Quit_To_Menu")
+                    || (currentScene != "Menu_Title" && (string.IsNullOrEmpty(nextScene)
+                    || nextScene == "Menu_Title"));
                 if (gameState == GameState.PLAYING && lastGameState == GameState.MAIN_MENU) {
                     lookForTeleporting = true;
                 }
                 if (lookForTeleporting && (gameState != GameState.PLAYING && gameState != GameState.ENTERING_LEVEL)) {
                     lookForTeleporting = false;
                 }
-                if (gameState == GameState.LOADING && lastGameState == GameState.CUTSCENE && currentScene == OPENING_SEQUENCE) {
+                if (gameState == GameState.LOADING && lastGameState == GameState.CUTSCENE && currentScene == "Opening_Sequence") {
                     mmsRoomDupe = true;
                 }
                 else if (gameState == GameState.PLAYING) {
@@ -96,8 +93,7 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 bool acceptingInput = gameManager.inputHandler.acceptingInput;
                 HeroTransitionState heroTransitionState = gameManager.hero_ctrl?.transitionState ?? HeroTransitionState.WAITING_TO_TRANSITION;
                 UIState uiState = gameManager.ui.uiState;
-                
-                bool sceneLoadNull = (sceneLoadFieldInfo.GetValue(gameManager) == null);
+                bool sceneLoadNull = (SceneLoadFieldInfo.GetValue(gameManager) == null);
 
                 timePaused = (lookForTeleporting)
                     || ((gameState == GameState.PLAYING || gameState == GameState.ENTERING_LEVEL) && uiState != UIState.PLAYING)
