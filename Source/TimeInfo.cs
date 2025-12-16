@@ -46,6 +46,7 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             string currentScene = gameManager.sceneName;
             string nextScene = gameManager.nextSceneName;
             GameState gameState = gameManager.GameState;
+            PlayerData playerData = gameManager.hero_ctrl?.playerData;
 
             //TODO: Determine end logic based on autosplitter
             bool sceneLoadActivationAllowed = false;
@@ -67,9 +68,9 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 inGameTime = ConfigManager.StartingGameTime;
             }
 
-            // if (timeStart && !timeEnd && ) {
-            //     timeEnd = true;
-            // }
+            if (timeStart && !timeEnd && playerData.maxHealthBase == 6 && playerData.heartPieces == 0) {
+                timeEnd = true;
+            }
 
             bool timePaused = false;
             
