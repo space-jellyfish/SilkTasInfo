@@ -62,13 +62,17 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 }
             }
             
-            if (!timeStart && nextScene == "Tut_01" && sceneLoadActivationAllowed) {
-                // StartNewGame
+            if (!timeStart &&
+                //nextScene == "Tut_01" && sceneLoadActivationAllowed
+                currentScene == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING
+            ) {
                 timeStart = true;
                 inGameTime = ConfigManager.StartingGameTime;
             }
 
-            if (timeStart && !timeEnd && playerData.maxHealthBase == 6 && playerData.heartPieces == 0) {
+            if (timeStart && !timeEnd &&
+                playerData.maxHealthBase == 6 && playerData.heartPieces == 0
+            ) {
                 timeEnd = true;
             }
 
