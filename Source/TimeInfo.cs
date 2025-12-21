@@ -71,7 +71,7 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             }
 
             if (timeStart && !timeEnd &&
-                playerData.maxHealthBase == 6 && playerData.heartPieces == 0
+                playerData != null && playerData.maxHealthBase == 6 && playerData.heartPieces == 0
             ) {
                 timeEnd = true;
             }
@@ -95,9 +95,9 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 else if (gameState == GameState.PLAYING) {
                     mmsRoomDupe = false;
                 }
-                bool acceptingInput = gameManager.inputHandler.acceptingInput;
+                bool acceptingInput = gameManager.inputHandler?.acceptingInput ?? false;
                 HeroTransitionState heroTransitionState = gameManager.hero_ctrl?.transitionState ?? HeroTransitionState.WAITING_TO_TRANSITION;
-                UIState uiState = gameManager.ui.uiState;
+                UIState uiState = gameManager.ui != null ? gameManager.ui.uiState : UIState.INACTIVE;
                 bool sceneLoadNull = (SceneLoadFieldInfo.GetValue(gameManager) == null);
 
                 timePaused = (lookForTeleporting)
