@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection;
 using Debug = UnityEngine.Debug;
 using Hpa = HutongGames.PlayMaker.Actions;
+using TeamCherry.SharedUtils;
 
 public static class RandomInjectionCallsV1 {
     private const BindingFlags allFlags = BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic;
@@ -287,6 +288,8 @@ public static class RandomInjectionCallsV1 {
         AddMethodsFromType(targetMethods, typeof(MemoryOrb), "<DoDissipate>d__", "MoveNext");
         AddMethodsFromType(targetMethods, typeof(MinesFlipPlatform), "<Idle>d__", "MoveNext");
         AddMethodsFromType(targetMethods, typeof(MinesFlipPlatform), "<Jitter>d__", "MoveNext");
+        AddMethodsFromType(targetMethods, typeof(MinMaxFloat), null, "GetRandomValue");
+        AddMethodsFromType(targetMethods, typeof(MinMaxInt), null, "GetRandomValue");
         AddMethodsFromType(targetMethods, typeof(NeedolinMsgBox), null, "GetNewText");
         AddMethodsFromType(targetMethods, typeof(NPCEncounterStateController), null, "Awake");
         AddMethodsFromType(targetMethods, typeof(ObjectBounce), null, "OnCollisionEnter2D");
