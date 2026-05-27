@@ -16,7 +16,16 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
         public static bool timeStart = false;
         private static bool timeEnd = false;
         private static float inGameTime = 0f;
+        private const bool pauseOnFileSelect = true;
         private static readonly int minorVersion = int.Parse(Constants.GAME_VERSION.Substring(2, 1));
+        private static readonly bool isVersionWithoutAdvancedGamepadMenu = minorVersion < 29280;
+
+        private static bool GetAnySlotBlackThreaded(GameManager gameManager) {
+            return (gameManager.ui?.slotOne?.IsBlackThreaded ?? false) ||
+                (gameManager.ui?.slotTwo?.IsBlackThreaded ?? false) ||
+                (gameManager.ui?.slotThree?.IsBlackThreaded ?? false) ||
+                (gameManager.ui?.slotFour?.IsBlackThreaded ?? false);
+        }
 
         private static string FormattedTime {
             get {
@@ -97,15 +106,17 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 }
                 bool acceptingInput = gameManager.inputHandler?.acceptingInput ?? false;
                 HeroTransitionState heroTransitionState = gameManager.hero_ctrl?.transitionState ?? HeroTransitionState.WAITING_TO_TRANSITION;
-                UIState uiState = gameManager.ui != null ? gameManager.ui.uiState : UIState.INACTIVE;
-                bool sceneLoadNull = (SceneLoadFieldInfo.GetValue(gameManager) == null);
+                UIState uiState = gameManager.ui?.uiState ?? UIState.INACTIVE;
+                MainMenuState menuState = gameManager.ui?.menuState ?? MainMenuState.MAIN_MENU;
+                bool sceneLoadNull = SceneLoadFieldInfo.GetValue(gameManager) == null;
 
                 timePaused = (lookForTeleporting)
                     || ((gameState == GameState.PLAYING || gameState == GameState.ENTERING_LEVEL) && uiState != UIState.PLAYING)
-                    || (gameState != GameState.PLAYING && gameState != GameState.CUTSCENE && !acceptingInput && !mmsRoomDupe)
-                    || ((gameState == GameState.EXITING_LEVEL && (sceneLoadNull || sceneLoadActivationAllowed) && !mmsRoomDupe) || gameState == GameState.LOADING)
-                    || (heroTransitionState == HeroTransitionState.WAITING_TO_ENTER_LEVEL)
-                    || (uiState != UIState.PLAYING && (loadingMenu || (uiState != UIState.PAUSED && uiState != UIState.CUTSCENE && !string.IsNullOrEmpty(nextScene))) && nextScene != currentScene);
+                    || (gameState != GameState.PLAYING && gameState != GameState.CUTSCENE && uiState != UIState.CUTSCENE && !acceptingInput && !mmsRoomDupe)
+                    || ((gameState == GameState.EXITING_LEVEL && uiState != UIState.CUTSCENE && (sceneLoadNull || sceneLoadActivationAllowed) && !playerData.isInventoryOpen && !mmsRoomDupe) || gameState == GameState.LOADING)
+                    || (heroTransitionState == HeroTransitionState.WAITING_TO_ENTER_LEVEL && !playerData.isInventoryOpen)
+                    || (uiState != UIState.PLAYING && (loadingMenu || (uiState != UIState.PAUSED && uiState != UIState.CUTSCENE && !string.IsNullOrEmpty(nextScene))) && nextScene != currentScene)
+                    || (pauseOnFileSelect && gameState == GameState.MAIN_MENU && uiState == UIState.MAIN_MENU_HOME && currentScene == "Menu_Title" && menuState == MainMenuState.SAVE_PROFILES && !GetAnySlotBlackThreaded(gameManager));
             } catch {
                 // ignore
             }
@@ -126,8 +137,8 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             }
 
             var isLoading = gameState == GameState.EXITING_LEVEL ||
-                                            gameState == GameState.ENTERING_LEVEL ||
-                                            gameState == GameState.LOADING;
+                            gameState == GameState.ENTERING_LEVEL ||
+                            gameState == GameState.LOADING;
             var infoFlags = TasInfoFlags.None;
             if (ConfigManager.DisableFFDuringLoads) {
                 if (isLoading && !wasLoading) {
