@@ -16,7 +16,6 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
         public static bool timeStart = false;
         private static bool timeEnd = false;
         private static float inGameTime = 0f;
-        private const bool pauseOnFileSelect = true;
         private static readonly int minorVersion = int.Parse(Constants.GAME_VERSION.Substring(2, 1));
         private static readonly bool isVersionWithoutAdvancedGamepadMenu = minorVersion < 29280;
 
@@ -116,7 +115,7 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                     || ((gameState == GameState.EXITING_LEVEL && uiState != UIState.CUTSCENE && (sceneLoadNull || sceneLoadActivationAllowed) && !playerData.isInventoryOpen && !mmsRoomDupe) || gameState == GameState.LOADING)
                     || (heroTransitionState == HeroTransitionState.WAITING_TO_ENTER_LEVEL && !playerData.isInventoryOpen)
                     || (uiState != UIState.PLAYING && (loadingMenu || (uiState != UIState.PAUSED && uiState != UIState.CUTSCENE && !string.IsNullOrEmpty(nextScene))) && nextScene != currentScene)
-                    || (pauseOnFileSelect && gameState == GameState.MAIN_MENU && uiState == UIState.MAIN_MENU_HOME && currentScene == "Menu_Title" && menuState == MainMenuState.SAVE_PROFILES && !GetAnySlotBlackThreaded(gameManager));
+                    || (ConfigManager.PauseOnFileSelect && gameState == GameState.MAIN_MENU && uiState == UIState.MAIN_MENU_HOME && currentScene == "Menu_Title" && menuState == MainMenuState.SAVE_PROFILES && !GetAnySlotBlackThreaded(gameManager));
             } catch {
                 // ignore
             }

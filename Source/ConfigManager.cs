@@ -32,6 +32,7 @@ PositionPrecision = 5
 VelocityPrecision = 3
 StartingGameTime = 0
 PauseTimer = false
+PauseOnFileSelect = true
 DisableFFDuringLoads = false
 
 # 碰撞箱颜色 ARGB 格式，注释或删除则不显示该类 hitbox
@@ -79,6 +80,7 @@ DisableCameraShake = false
         public static int PositionPrecision => GetSettingValue(nameof(PositionPrecision), 5);
         public static int VelocityPrecision => GetSettingValue(nameof(VelocityPrecision), 3);
         public static bool PauseTimer => GetSettingValue(nameof(PauseTimer), false);
+        public static bool PauseOnFileSelect => Enabled && GetSettingValue<bool>(nameof(PauseOnFileSelect));
         public static float CameraZoom => Enabled ? GetSettingValue(nameof(CameraZoom), 1f) : 1f;
         public static bool CameraFollow => Enabled && GetSettingValue<bool>(nameof(CameraFollow));
         public static bool DisableCameraShake => Enabled && GetSettingValue<bool>(nameof(DisableCameraShake));
