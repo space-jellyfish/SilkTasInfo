@@ -71,8 +71,8 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             }
             
             if (!timeStart && (ConfigManager.AutostartTimer
-                || (nextScene == "Tut_01" && sceneLoadActivationAllowed) /*start from new save*/
-                || (currentScene == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING) /*start from autosave*/)
+                || (!ConfigManager.StartFromAutosave && (nextScene == "Tut_01" && sceneLoadActivationAllowed)) /*start from new save*/
+                || (ConfigManager.StartFromAutosave && (currentScene == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING)) /*start from autosave*/)
             ) {
                 timeStart = true;
                 inGameTime = ConfigManager.StartingGameTime;

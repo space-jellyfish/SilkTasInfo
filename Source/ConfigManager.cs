@@ -33,6 +33,7 @@ VelocityPrecision = 3
 StartingGameTime = 0
 PauseTimer = false
 AutostartTimer = false
+StartFromAutosave = true
 PauseOnFileSelect = true
 DisableFFDuringLoads = false
 
@@ -82,6 +83,7 @@ DisableCameraShake = false
         public static int VelocityPrecision => GetSettingValue(nameof(VelocityPrecision), 3);
         public static bool PauseTimer => GetSettingValue(nameof(PauseTimer), false);
         public static bool AutostartTimer => GetSettingValue<bool>(nameof(AutostartTimer), false);
+        public static bool StartFromAutosave => GetSettingValue<bool>(nameof(StartFromAutosave), true);
         public static bool PauseOnFileSelect => GetSettingValue<bool>(nameof(PauseOnFileSelect), true);
         public static float CameraZoom => Enabled ? GetSettingValue(nameof(CameraZoom), 1f) : 1f;
         public static bool CameraFollow => Enabled && GetSettingValue<bool>(nameof(CameraFollow));
