@@ -70,9 +70,9 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 }
             }
             
-            if (!timeStart &&
-                //nextScene == "Tut_01" && sceneLoadActivationAllowed
-                currentScene == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING
+            if (!timeStart && (ConfigManager.AutostartTimer
+                || (nextScene == "Tut_01" && sceneLoadActivationAllowed) /*start from new save*/
+                || (currentScene == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING) /*start from autosave*/)
             ) {
                 timeStart = true;
                 inGameTime = ConfigManager.StartingGameTime;

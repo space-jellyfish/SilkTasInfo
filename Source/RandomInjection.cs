@@ -132,8 +132,6 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 InjectNamePrefixForType(typeof(HeroAnimationController), null, "UpdateAnimation");
                 InjectNamePrefixForType(typeof(CorpseItems), null, "GetPickupItems");
                 InjectNamePrefixForType(typeof(HealthManager), null, "Die");
-                InjectNamePrefixForType(typeof(MinMaxFloat), null, "GetRandomValue");
-                InjectNamePrefixForType(typeof(MinMaxInt), null, "GetRandomValue");
             } catch (Exception ex) {
                 Debug.Log("Error while injecting extension context: " + ex.Message);
             }

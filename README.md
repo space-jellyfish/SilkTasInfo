@@ -88,6 +88,7 @@ of hitboxes, so it's recommended to disable this when encoding or catching up.
 * `VelocityPrecision`: The number of decimal places to display for velocity.
 * `PauseTimer`: While true, this explicitly pauses the loadless timer.  This can be useful when doing spliced TASes
 where you need to start the timer at a specific point in time in the encoding.
+* `AutostartTimer`: When true, the timer is started automatically instead of when loading a new save or autosave.
 * `PauseOnFileSelect`: When true, the timer pauses on the file select menu if there are no black threaded slots.
 * `CameraZoom`: The camera zoom level.  This is useful when TASing large rooms where you want to be able to
 see distant enemies or colliders.  This is implemented in such a way that it shouldn't cause desyncs, so you
