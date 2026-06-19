@@ -58,7 +58,7 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
 
             //TODO: Determine end logic based on autosplitter
             bool sceneLoadActivationAllowed = false;
-            object sceneLoad = SceneLoadFieldInfo.GetValue(gameManager);
+            object sceneLoad = SceneLoadFieldInfo?.GetValue(gameManager);
             if (sceneLoad == null) {
                 sceneLoadActivationAllowed = true;
             }
@@ -107,7 +107,7 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 HeroTransitionState heroTransitionState = gameManager.hero_ctrl?.transitionState ?? HeroTransitionState.WAITING_TO_TRANSITION;
                 UIState uiState = gameManager.ui?.uiState ?? UIState.INACTIVE;
                 MainMenuState menuState = gameManager.ui?.menuState ?? MainMenuState.MAIN_MENU;
-                bool sceneLoadNull = SceneLoadFieldInfo.GetValue(gameManager) == null;
+                bool sceneLoadNull = SceneLoadFieldInfo?.GetValue(gameManager) == null;
 
                 timePaused = (lookForTeleporting)
                     || ((gameState == GameState.PLAYING || gameState == GameState.ENTERING_LEVEL) && uiState != UIState.PLAYING)
