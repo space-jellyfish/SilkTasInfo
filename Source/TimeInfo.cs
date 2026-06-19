@@ -109,7 +109,8 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 MainMenuState menuState = gameManager.ui?.menuState ?? MainMenuState.MAIN_MENU;
                 bool sceneLoadNull = SceneLoadFieldInfo?.GetValue(gameManager) == null;
 
-                timePaused = (lookForTeleporting)
+                timePaused = ConfigManager.PauseTimer
+                    || lookForTeleporting
                     || ((gameState == GameState.PLAYING || gameState == GameState.ENTERING_LEVEL) && uiState != UIState.PLAYING)
                     || (gameState != GameState.PLAYING && gameState != GameState.CUTSCENE && uiState != UIState.CUTSCENE && !acceptingInput && !mmsRoomDupe)
                     || ((gameState == GameState.EXITING_LEVEL && uiState != UIState.CUTSCENE && (sceneLoadNull || sceneLoadActivationAllowed) && !playerData.isInventoryOpen && !mmsRoomDupe) || gameState == GameState.LOADING)
