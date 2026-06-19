@@ -13,7 +13,6 @@ using MonoMod.RuntimeDetour.HookGen;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using Debug = UnityEngine.Debug;
-using TeamCherry.SharedUtils;
 
 namespace Assembly_CSharp.TasInfo.mm.Source {
     public static class RandomInjection {
