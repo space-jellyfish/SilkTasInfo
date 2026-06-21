@@ -52,8 +52,6 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
         private static bool wasMaggoted = false;
 
         public static void OnPreRender(GameManager gameManager, StringBuilder infoBuilder) {
-            string currentScene = gameManager.sceneName;
-            string nextScene = gameManager.nextSceneName;
             GameState gameState = gameManager.GameState;
             PlayerData playerData = gameManager.playerData;
             bool isMaggoted = gameManager.hero_ctrl?.cState?.isMaggoted ?? false;
@@ -72,34 +70,36 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 }
             }
             
-            if (!timeStart && (ConfigManager.AutostartTimer
-                || (!ConfigManager.StartFromAutosave && (nextScene == "Tut_01" && sceneLoadActivationAllowed)) /* start from new save */
-                || (ConfigManager.StartFromAutosave && (currentScene == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING)) /* start from autosave */)
+            if (!timeStart && (ConfigManager.StartTimer
+                || (ConfigManager.StartingSplit == "StartNewGame" && gameManager.nextSceneName == "Tut_01" && sceneLoadActivationAllowed)
+                || (ConfigManager.StartingSplit == "Act1Start" && gameManager.sceneName == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING))
             ) {
                 timeStart = true;
                 inGameTime = ConfigManager.StartingGameTime;
             }
 
             if (timeStart && !timeEnd && (
-                (playerData != null && playerData.silkMax == 10 && playerData.silkSpoolParts == 0) /* 2sf */
-                || (playerData != null && playerData.maxHealthBase == 6 && playerData.heartPieces == 0) /* 4ms */
-                || (playerData != null && playerData.GetToolData("Rosary Magnet").IsUnlocked) /* 5tools */
-                || (playerData != null && playerData.spinnerDefeated) /* 10achievements */
-                || (playerData != null && playerData.HasSlabKeyB) /* 11keys */
-                || (playerData != null && playerData.maxHealthBase == 9 && playerData.heartPieces == 0) /* 16ms */
-                || (playerData != null && playerData.act2Started) /* act1 */
-                || (playerData != null && playerData.UnlockedCoralTowerStation) /* all bellways */
-                || (playerData != null && playerData.GetToolData("Flea Charm").IsUnlocked) /* awoo */
-                || (playerData != null && playerData.health > 0 && wasMaggoted && !isMaggoted) /* bath */
-                || (playerData != null && playerData.defeatedLace1) /* beer bottle */
-                || (playerData != null && playerData.BelltownDoctorConvo == 3) /* dapper slapper */
-                || (playerData != null && playerData.defeatedSplinterQueen) /* firewood */
-                || (playerData != null && playerData.GetToolData("Curve Claws").IsUnlocked) /* aussie */
-                || (playerData != null && playerData.GotGourmandReward) /* glutton */
-                || (playerData != null && playerData.defeatedLastJudge) /* ordinal */
-                || (playerData != null && playerData.UnlockedPeakStation) /* slab */
-                || (playerData != null && playerData.HasBoundCrestUpgrader) /* sylphsong */
-                || (currentScene.StartsWith("Cinematic_Ending")) /* any, twisted, te, 100 */
+                (ConfigManager.EndingSplit == "MossMotherTrans" && playerData.defeatedMossMother && gameManager.lastSceneName != gameManager.sceneName) // grotto
+                || (ConfigManager.EndingSplit == "Spool1" && playerData.silkMax == 10 && playerData.silkSpoolParts == 0) // 2sf
+                || (ConfigManager.EndingSplit == "Mask1" && playerData.maxHealthBase == 6 && playerData.heartPieces == 0) // 4ms
+                || (ConfigManager.EndingSplit == "MagnetiteBrooch" && playerData.GetToolData("Rosary Magnet").IsUnlocked) // 5tools
+                || (ConfigManager.EndingSplit == "Widow" && playerData.spinnerDefeated) // 10achievements
+                || (ConfigManager.EndingSplit == "SlabKeyHeretic" && playerData.HasSlabKeyB) // 11keys
+                || (ConfigManager.EndingSplit == "Mask4" && playerData.maxHealthBase == 9 && playerData.heartPieces == 0) // 16ms
+                || (ConfigManager.EndingSplit == "Act2Started" && playerData.act2Started) // act1
+                || (ConfigManager.EndingSplit == "BlastedStepsStation" && playerData.UnlockedCoralTowerStation) // all bellways
+                || (ConfigManager.EndingSplit == "PutrifiedDuctsStation" && playerData.UnlockedAqueductStation) // all bellways
+                || (ConfigManager.EndingSplit == "EggofFlealia" && playerData.GetToolData("Flea Charm").IsUnlocked) // awoo
+                || (ConfigManager.EndingSplit == "MaggotsRemoved" && playerData.health > 0 && wasMaggoted && !isMaggoted) // bath
+                || (ConfigManager.EndingSplit == "Lace1" && playerData.defeatedLace1) // beer bottle
+                || (ConfigManager.EndingSplit == "YarnabySlap" && playerData.BelltownDoctorConvo == 3) // dapper slapper
+                || (ConfigManager.EndingSplit == "SisterSplinter" && playerData.defeatedSplinterQueen) // firewood
+                || (ConfigManager.EndingSplit == "Curveclaw" && playerData.GetToolData("Curve Claws").IsUnlocked) // aussie
+                || (ConfigManager.EndingSplit == "GreatTasteReward" && playerData.GotGourmandReward) // glutton
+                || (ConfigManager.EndingSplit == "LastJudge" && playerData.defeatedLastJudge) // ordinal
+                || (ConfigManager.EndingSplit == "SlabStation" && playerData.UnlockedPeakStation) // slab
+                || (ConfigManager.EndingSplit == "Sylphsong" && playerData.HasBoundCrestUpgrader) // sylphsong
+                || (ConfigManager.EndingSplit == "EndingSplit" && gameManager.sceneName.StartsWith("Cinematic_Ending")) // any, twisted, te, 100
                 )
             ) {
                 timeEnd = true;
@@ -109,16 +109,16 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             
             // migrated from https://github.com/AlexKnauth/silksong-autosplit-wasm/blob/master/src/lib.rs
             try {
-                bool loadingMenu = (currentScene == "Quit_To_Menu")
-                    || (currentScene != "Menu_Title" && (string.IsNullOrEmpty(nextScene)
-                    || nextScene == "Menu_Title"));
+                bool loadingMenu = (gameManager.sceneName == "Quit_To_Menu")
+                    || (gameManager.sceneName != "Menu_Title" && (string.IsNullOrEmpty(gameManager.nextSceneName)
+                    || gameManager.nextSceneName == "Menu_Title"));
                 if (gameState == GameState.PLAYING && lastGameState == GameState.MAIN_MENU) {
                     lookForTeleporting = true;
                 }
                 if (lookForTeleporting && (gameState != GameState.PLAYING && gameState != GameState.ENTERING_LEVEL)) {
                     lookForTeleporting = false;
                 }
-                if (gameState == GameState.LOADING && lastGameState == GameState.CUTSCENE && currentScene == "Opening_Sequence") {
+                if (gameState == GameState.LOADING && lastGameState == GameState.CUTSCENE && gameManager.sceneName == "Opening_Sequence") {
                     mmsRoomDupe = true;
                 }
                 else if (gameState == GameState.PLAYING) {
@@ -136,8 +136,8 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                     || (gameState != GameState.PLAYING && gameState != GameState.CUTSCENE && uiState != UIState.CUTSCENE && !acceptingInput && !mmsRoomDupe)
                     || ((gameState == GameState.EXITING_LEVEL && uiState != UIState.CUTSCENE && (sceneLoadNull || sceneLoadActivationAllowed) && !playerData.isInventoryOpen && !mmsRoomDupe) || gameState == GameState.LOADING)
                     || (heroTransitionState == HeroTransitionState.WAITING_TO_ENTER_LEVEL && !playerData.isInventoryOpen)
-                    || (uiState != UIState.PLAYING && (loadingMenu || (uiState != UIState.PAUSED && uiState != UIState.CUTSCENE && !string.IsNullOrEmpty(nextScene))) && nextScene != currentScene)
-                    || (ConfigManager.PauseOnFileSelect && gameState == GameState.MAIN_MENU && uiState == UIState.MAIN_MENU_HOME && currentScene == "Menu_Title" && menuState == MainMenuState.SAVE_PROFILES && !GetAnySlotBlackThreaded(gameManager));
+                    || (uiState != UIState.PLAYING && (loadingMenu || (uiState != UIState.PAUSED && uiState != UIState.CUTSCENE && !string.IsNullOrEmpty(gameManager.nextSceneName))) && gameManager.nextSceneName != gameManager.sceneName)
+                    || (ConfigManager.PauseOnFileSelect && gameState == GameState.MAIN_MENU && uiState == UIState.MAIN_MENU_HOME && gameManager.sceneName == "Menu_Title" && menuState == MainMenuState.SAVE_PROFILES && !GetAnySlotBlackThreaded(gameManager));
             } catch {
                 // ignore
             }
