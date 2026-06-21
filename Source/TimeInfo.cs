@@ -52,6 +52,9 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
         private static bool wasMaggoted = false;
 
         public static void OnPreRender(GameManager gameManager, StringBuilder infoBuilder) {
+            string lastScene = gameManager.lastSceneName;
+            string currentScene = gameManager.sceneName;
+            string nextScene = gameManager.nextSceneName;
             GameState gameState = gameManager.GameState;
             PlayerData playerData = gameManager.playerData;
             bool isMaggoted = gameManager.hero_ctrl?.cState?.isMaggoted ?? false;
@@ -71,15 +74,15 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             }
             
             if (!timeStart && (ConfigManager.StartTimer
-                || (ConfigManager.StartingSplit == "StartNewGame" && gameManager.nextSceneName == "Tut_01" && sceneLoadActivationAllowed)
-                || (ConfigManager.StartingSplit == "Act1Start" && gameManager.sceneName == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING))
+                || (ConfigManager.StartingSplit == "StartNewGame" && nextScene == "Tut_01" && sceneLoadActivationAllowed)
+                || (ConfigManager.StartingSplit == "Act1Start" && currentScene == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING))
             ) {
                 timeStart = true;
                 inGameTime = ConfigManager.StartingGameTime;
             }
 
             if (timeStart && !timeEnd && (
-                (ConfigManager.EndingSplit == "MossMotherTrans" && playerData.defeatedMossMother && gameManager.lastSceneName != gameManager.sceneName) // grotto
+                (ConfigManager.EndingSplit == "MossMotherTrans" && playerData.defeatedMossMother && lastScene != currentScene) // grotto
                 || (ConfigManager.EndingSplit == "Spool1" && playerData.silkMax == 10 && playerData.silkSpoolParts == 0) // 2sf
                 || (ConfigManager.EndingSplit == "Mask1" && playerData.maxHealthBase == 6 && playerData.heartPieces == 0) // 4ms
                 || (ConfigManager.EndingSplit == "MagnetiteBrooch" && playerData.GetToolData("Rosary Magnet").IsUnlocked) // 5tools
@@ -99,7 +102,7 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                 || (ConfigManager.EndingSplit == "LastJudge" && playerData.defeatedLastJudge) // ordinal
                 || (ConfigManager.EndingSplit == "SlabStation" && playerData.UnlockedPeakStation) // slab
                 || (ConfigManager.EndingSplit == "Sylphsong" && playerData.HasBoundCrestUpgrader) // sylphsong
-                || (ConfigManager.EndingSplit == "EndingSplit" && gameManager.sceneName.StartsWith("Cinematic_Ending")) // any, twisted, te, 100
+                || (ConfigManager.EndingSplit == "EndingSplit" && currentScene.StartsWith("Cinematic_Ending")) // any, twisted, te, 100
                 )
             ) {
                 timeEnd = true;
@@ -109,16 +112,16 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             
             // migrated from https://github.com/AlexKnauth/silksong-autosplit-wasm/blob/master/src/lib.rs
             try {
-                bool loadingMenu = (gameManager.sceneName == "Quit_To_Menu")
-                    || (gameManager.sceneName != "Menu_Title" && (string.IsNullOrEmpty(gameManager.nextSceneName)
-                    || gameManager.nextSceneName == "Menu_Title"));
+                bool loadingMenu = (currentScene == "Quit_To_Menu")
+                    || (currentScene != "Menu_Title" && (string.IsNullOrEmpty(nextScene)
+                    || nextScene == "Menu_Title"));
                 if (gameState == GameState.PLAYING && lastGameState == GameState.MAIN_MENU) {
                     lookForTeleporting = true;
                 }
                 if (lookForTeleporting && (gameState != GameState.PLAYING && gameState != GameState.ENTERING_LEVEL)) {
                     lookForTeleporting = false;
                 }
-                if (gameState == GameState.LOADING && lastGameState == GameState.CUTSCENE && gameManager.sceneName == "Opening_Sequence") {
+                if (gameState == GameState.LOADING && lastGameState == GameState.CUTSCENE && currentScene == "Opening_Sequence") {
                     mmsRoomDupe = true;
                 }
                 else if (gameState == GameState.PLAYING) {
@@ -136,8 +139,8 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
                     || (gameState != GameState.PLAYING && gameState != GameState.CUTSCENE && uiState != UIState.CUTSCENE && !acceptingInput && !mmsRoomDupe)
                     || ((gameState == GameState.EXITING_LEVEL && uiState != UIState.CUTSCENE && (sceneLoadNull || sceneLoadActivationAllowed) && !playerData.isInventoryOpen && !mmsRoomDupe) || gameState == GameState.LOADING)
                     || (heroTransitionState == HeroTransitionState.WAITING_TO_ENTER_LEVEL && !playerData.isInventoryOpen)
-                    || (uiState != UIState.PLAYING && (loadingMenu || (uiState != UIState.PAUSED && uiState != UIState.CUTSCENE && !string.IsNullOrEmpty(gameManager.nextSceneName))) && gameManager.nextSceneName != gameManager.sceneName)
-                    || (ConfigManager.PauseOnFileSelect && gameState == GameState.MAIN_MENU && uiState == UIState.MAIN_MENU_HOME && gameManager.sceneName == "Menu_Title" && menuState == MainMenuState.SAVE_PROFILES && !GetAnySlotBlackThreaded(gameManager));
+                    || (uiState != UIState.PLAYING && (loadingMenu || (uiState != UIState.PAUSED && uiState != UIState.CUTSCENE && !string.IsNullOrEmpty(nextScene))) && nextScene != currentScene)
+                    || (ConfigManager.PauseOnFileSelect && gameState == GameState.MAIN_MENU && uiState == UIState.MAIN_MENU_HOME && currentScene == "Menu_Title" && menuState == MainMenuState.SAVE_PROFILES && !GetAnySlotBlackThreaded(gameManager));
             } catch {
                 // ignore
             }
@@ -150,8 +153,8 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             }
 
             List<string> result = new();
-            if (!string.IsNullOrEmpty(gameManager.sceneName) && ConfigManager.ShowSceneName) {
-                result.Add(gameManager.sceneName);
+            if (!string.IsNullOrEmpty(currentScene) && ConfigManager.ShowSceneName) {
+                result.Add(currentScene);
             }
 
             if (inGameTime > 0 && ConfigManager.ShowTime) {
