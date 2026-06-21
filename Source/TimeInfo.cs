@@ -73,34 +73,37 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             }
             
             if (!timeStart && (ConfigManager.AutostartTimer
-                || (!ConfigManager.StartFromAutosave && (nextScene == "Tut_01" && sceneLoadActivationAllowed)) /* start from new save */
-                || (ConfigManager.StartFromAutosave && (currentScene == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING)) /* start from autosave */)
+                || (!ConfigManager.StartFromAutosave && (nextScene == "Tut_01" && sceneLoadActivationAllowed)) // start from new save
+                || (ConfigManager.StartFromAutosave && (currentScene == "Tut_01" && !playerData.disablePause && gameState == GameState.PLAYING)) // start from autosave
+                || (currentScene == "Bonetown")
+                || (gameManager.hero_ctrl.cState.swimming)
+                )
             ) {
                 timeStart = true;
                 inGameTime = ConfigManager.StartingGameTime;
             }
 
-            if (timeStart && !timeEnd && (
-                (playerData != null && playerData.silkMax == 10 && playerData.silkSpoolParts == 0) /* 2sf */
-                || (playerData != null && playerData.maxHealthBase == 6 && playerData.heartPieces == 0) /* 4ms */
-                || (playerData != null && playerData.GetToolData("Rosary Magnet").IsUnlocked) /* 5tools */
-                || (playerData != null && playerData.spinnerDefeated) /* 10achievements */
-                || (playerData != null && playerData.HasSlabKeyB) /* 11keys */
-                || (playerData != null && playerData.maxHealthBase == 9 && playerData.heartPieces == 0) /* 16ms */
-                || (playerData != null && playerData.act2Started) /* act1 */
-                || (playerData != null && playerData.UnlockedCoralTowerStation) /* all bellways */
-                || (playerData != null && playerData.GetToolData("Flea Charm").IsUnlocked) /* awoo */
-                || (playerData != null && playerData.health > 0 && wasMaggoted && !isMaggoted) /* bath */
-                || (playerData != null && playerData.defeatedLace1) /* beer bottle */
-                || (playerData != null && playerData.BelltownDoctorConvo == 3) /* dapper slapper */
-                || (playerData != null && playerData.defeatedSplinterQueen) /* firewood */
-                || (playerData != null && playerData.GetToolData("Curve Claws").IsUnlocked) /* aussie */
-                || (playerData != null && playerData.GotGourmandReward) /* glutton */
-                || (playerData != null && playerData.defeatedLastJudge) /* ordinal */
-                || (playerData != null && playerData.UnlockedPeakStation) /* slab */
-                || (playerData != null && playerData.HasBoundCrestUpgrader) /* sylphsong */
-                || (currentScene.StartsWith("Cinematic_Ending")) /* any, twisted, te, 100 */
-                )
+            if (timeStart && !timeEnd && false /*(
+                (playerData != null && playerData.silkMax == 10 && playerData.silkSpoolParts == 0) // 2sf
+                || (playerData != null && playerData.maxHealthBase == 6 && playerData.heartPieces == 0) // 4ms
+                || (playerData != null && playerData.GetToolData("Rosary Magnet").IsUnlocked) // 5tools
+                || (playerData != null && playerData.spinnerDefeated) // 10achievements
+                || (playerData != null && playerData.HasSlabKeyB) // 11keys
+                || (playerData != null && playerData.maxHealthBase == 9 && playerData.heartPieces == 0) // 16ms
+                || (playerData != null && playerData.act2Started) // act1
+                || (playerData != null && playerData.UnlockedCoralTowerStation) // all bellways
+                || (playerData != null && playerData.GetToolData("Flea Charm").IsUnlocked) // awoo
+                || (playerData != null && playerData.health > 0 && wasMaggoted && !isMaggoted) // bath
+                || (playerData != null && playerData.defeatedLace1) // beer bottle
+                || (playerData != null && playerData.BelltownDoctorConvo == 3) // dapper slapper
+                || (playerData != null && playerData.defeatedSplinterQueen) // firewood
+                || (playerData != null && playerData.GetToolData("Curve Claws").IsUnlocked) // aussie
+                || (playerData != null && playerData.GotGourmandReward) // glutton
+                || (playerData != null && playerData.defeatedLastJudge) // ordinal
+                || (playerData != null && playerData.UnlockedPeakStation) // slab
+                || (playerData != null && playerData.HasBoundCrestUpgrader) // sylphsong
+                || (currentScene.StartsWith("Cinematic_Ending")) // any, twisted, te, 100
+                )*/
             ) {
                 timeEnd = true;
             }
