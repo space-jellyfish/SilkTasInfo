@@ -106,6 +106,7 @@ the viewing experience of the final encoded video if you don't want the shake.
  `DisableFFDuringLoads`: Whether to disable fast forward during loads. This can help improve sync stability, particularly on patch 1432.  Take
 care when setting savestates near to loads while using this feature, as a savestate inside a non-FF zone might
 preempt the fast forward protection, especially if immediately adjacent to the actual scene change.
+`SelfDamage`: When true, will attempt self damage of one health on the current frame.
 
 ## Custom Info Text
 

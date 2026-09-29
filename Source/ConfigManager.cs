@@ -37,6 +37,7 @@ StartingSplit = Act1Start
 EndingSplit = EndingSplit
 PauseOnFileSelect = true
 DisableFFDuringLoads = false
+SelfDamage = false
 
 # 碰撞箱颜色 ARGB 格式，注释或删除则不显示该类 hitbox
 KnightHitbox = 0xFF00FF00
@@ -93,6 +94,7 @@ DisableCameraShake = false
         public static bool IsCameraZoom => CameraZoom > 0f && Math.Abs(CameraZoom - 1f) > 0.001;
         public static float StartingGameTime => GetSettingValue<float>(nameof(StartingGameTime));
         public static bool DisableFFDuringLoads => GetSettingValue(nameof(DisableFFDuringLoads), false);
+        public static bool SelfDamage => GetSettingValue(nameof(SelfDamage), false);
 
         public static string GetHitboxColorValue(HitboxInfo.HitboxType hitboxType) {
             return GetSettingValue($"{hitboxType}Hitbox", string.Empty);

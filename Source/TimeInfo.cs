@@ -59,6 +59,10 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             PlayerData playerData = gameManager.playerData;
             bool isMaggoted = gameManager.hero_ctrl?.cState?.isMaggoted ?? false;
 
+            if (ConfigManager.SelfDamage) {
+                gameManager.hero_ctrl?.DamageSelf(1);
+            }
+
             //TODO: Determine end logic based on autosplitter
             bool sceneLoadActivationAllowed = false;
             object sceneLoad = SceneLoadFieldInfo?.GetValue(gameManager);
