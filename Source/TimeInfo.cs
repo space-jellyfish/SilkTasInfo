@@ -59,6 +59,10 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
             PlayerData playerData = gameManager.playerData;
             bool isMaggoted = gameManager.hero_ctrl?.cState?.isMaggoted ?? false;
 
+            Debug.Log($"Correct Doors: {playerData.CorrectMazeDoorsEntered}");
+            Debug.Log($"Incorrect Doors: {playerData.IncorrectMazeDoorsEntered}");
+            Debug.Log($"Previous Target Door: {playerData.PreviousMazeTargetDoor}");
+
             //TODO: Determine end logic based on autosplitter
             bool sceneLoadActivationAllowed = false;
             object sceneLoad = SceneLoadFieldInfo?.GetValue(gameManager);
