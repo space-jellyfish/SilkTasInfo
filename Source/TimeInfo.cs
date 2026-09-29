@@ -83,6 +83,7 @@ namespace Assembly_CSharp.TasInfo.mm.Source {
 
             if (timeStart && !timeEnd && (
                 (ConfigManager.EndingSplit == "MossMotherTrans" && playerData.defeatedMossMother && lastScene != currentScene) // grotto
+                || (ConfigManager.EndingSplit == "SilkSpear" && playerData.hasNeedleThrow) // silk spear
                 || (ConfigManager.EndingSplit == "Spool1" && playerData.silkMax == 10 && playerData.silkSpoolParts == 0) // 2sf
                 || (ConfigManager.EndingSplit == "Mask1" && playerData.maxHealthBase == 6 && playerData.heartPieces == 0) // 4ms
                 || (ConfigManager.EndingSplit == "MagnetiteBrooch" && playerData.GetToolData("Rosary Magnet").IsUnlocked) // 5tools
